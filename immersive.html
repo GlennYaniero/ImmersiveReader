@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Immersive Reader Example</title>
+    <script type="text/javascript" src="https://ircdname.azureedge.net/immersivereadersdk/immersive-reader-sdk.1.4.0.js"></script>
+</head>
+<body>
+    <h1>Immersive Reader Prototype</h1>
+    <button id="launchButton">Launch Immersive Reader</button>
+    <div id="content" style="display:none;">
+        <p>This is a sample text to be read in Immersive Reader.</p>
+    </div>
+
+    <script type="text/javascript">
+        document.getElementById('launchButton').addEventListener('click', async function() {
+            const response = await fetch('http://127.0.0.1:8000/immersive-reader', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text: document.getElementById('content').innerText })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                ImmersiveReader.launchAsync(data.token, data.subdomain, {
+                    content: {
+                        blocks: [
+                            {
+                                text: document.getElementById('content').innerText
+                            }
+                        ]
+                    }
+                }).then(function(readerResponse) {
+                    console.log('Immersive Reader launched:', readerResponse);
+                }).catch(function(error) {
+                    console.error('Error launching Immersive Reader:', error);
+                });
+            } else {
+                console.error('Error fetching token:', await response.text());
+            }
+        });
+    </script>
+</body>
+</html>
